@@ -1,0 +1,4 @@
+[package]
+name = "bare-rust"
+version = "0.0.1"
+authors = [ "Nan Wang <wangnangg@gmail.com>" ]

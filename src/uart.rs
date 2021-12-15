@@ -51,6 +51,12 @@ impl Uart {
         self.regs.io.write(c as u32);
     }
 
+    pub fn send_str(&mut self, s: &str) {
+        for c in s.as_bytes() {
+            self.send(*c);
+        }
+    }
+
     pub fn data_ready(&self) -> bool {
         let val = self.regs.lsr.read();
         bit_range_get(val, 0, 0) > 0

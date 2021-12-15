@@ -37,22 +37,7 @@ impl Peripherial {
 
 global_asm!(include_str!("start.s"));
 
-#[no_mangle]
-pub extern "C" fn main() {
-    let mut periph = Peripherial::new();
-    // periph.aux.enable_uart();
-    // periph.gpio.set_mini_uart_tx(GPIOMiniUartTxPin::GPIO14);
-    // periph.gpio.set_mini_uart_rx(GPIOMiniUartRxPin::GPIO15);
-    // periph.gpio.set_pull_state(&[14, 15], GPIOPullState::Off);
-    // periph.uart.enable_tx_rx();
-    // let mut uart = periph.uart;
-    // uart.send('h' as u8);
-    // uart.send('!' as u8);
-    // uart.send('\n' as u8);
-    // loop {
-    //     let c = uart.recv();
-    //     uart.send(c);
-    // }
+fn blink_gpio16(periph: &mut Peripherial) {
     periph.gpio.set_gpio_func(16, GPIOFunc::Out);
     loop {
         periph.gpio.set_pin_out(&[16]);
@@ -60,4 +45,36 @@ pub extern "C" fn main() {
         periph.gpio.clear_pin_out(&[16]);
         delay_s(1);
     }
+}
+
+fn uart_echo(periph: &mut Peripherial) {
+    periph.aux.enable_uart();
+    periph.gpio.set_mini_uart_tx(GPIOMiniUartTxPin::GPIO14);
+    periph.gpio.set_mini_uart_rx(GPIOMiniUartRxPin::GPIO15);
+    periph.gpio.set_pull_state(&[14, 15], GPIOPullState::Off);
+    periph.uart.enable_tx_rx();
+    let uart = &mut periph.uart;
+    uart.send(b'h');
+    uart.send(b'!');
+    uart.send(b'\n');
+    loop {
+        let c = uart.recv();
+        match c {
+            b'\r' => uart.send_str("\r\n"),
+            _ => uart.send(c),
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn main() {
+    let mut periph = Peripherial::new();
+
+    //boot signal
+    periph.gpio.set_gpio_func(16, GPIOFunc::Out);
+    periph.gpio.set_pin_out(&[16]);
+
+    uart_echo(&mut periph);
+
+    return;
 }

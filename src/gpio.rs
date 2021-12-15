@@ -109,6 +109,32 @@ impl GPIO {
         }
         self.regs.gppud.write(GPIOPullState::Off as u32);
     }
+
+    pub fn set_pin_out(&mut self, pins: &[u32]) {
+        let mut vals: [u32; 2] = [0, 0];
+        for pin in pins {
+            assert!(*pin <= 53);
+            let pin_index = (*pin / 32) as usize;
+            let pin_offset = (*pin % 32) as usize;
+            vals[pin_index] |= 1 << pin_offset;
+        }
+        for i in 0..2 {
+            self.regs.gpset[i].write(vals[i]);
+        }
+    }
+
+    pub fn clear_pin_out(&mut self, pins: &[u32]) {
+        let mut vals: [u32; 2] = [0, 0];
+        for pin in pins {
+            assert!(*pin <= 53);
+            let pin_index = (*pin / 32) as usize;
+            let pin_offset = (*pin % 32) as usize;
+            vals[pin_index] |= 1 << pin_offset;
+        }
+        for i in 0..2 {
+            self.regs.gpclr[i].write(vals[i]);
+        }
+    }
 }
 
 impl GPIO {}

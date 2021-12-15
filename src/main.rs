@@ -16,6 +16,7 @@ mod utils;
 use aux::*;
 use gpio::*;
 use uart::*;
+use utils::*;
 
 struct Peripherial {
     aux: Aux,
@@ -39,19 +40,24 @@ global_asm!(include_str!("start.s"));
 #[no_mangle]
 pub extern "C" fn main() {
     let mut periph = Peripherial::new();
-    periph.aux.enable_uart();
-    periph.gpio.set_mini_uart_tx(GPIOMiniUartTxPin::GPIO14);
-    periph.gpio.set_mini_uart_rx(GPIOMiniUartRxPin::GPIO15);
-    periph.gpio.set_pull_state(&[14, 15], GPIOPullState::Off);
-    periph.uart.enable_tx_rx();
-
-    let mut uart = periph.uart;
-    uart.send('h' as u8);
-    uart.send('!' as u8);
-    uart.send('\n' as u8);
+    // periph.aux.enable_uart();
+    // periph.gpio.set_mini_uart_tx(GPIOMiniUartTxPin::GPIO14);
+    // periph.gpio.set_mini_uart_rx(GPIOMiniUartRxPin::GPIO15);
+    // periph.gpio.set_pull_state(&[14, 15], GPIOPullState::Off);
+    // periph.uart.enable_tx_rx();
+    // let mut uart = periph.uart;
+    // uart.send('h' as u8);
+    // uart.send('!' as u8);
+    // uart.send('\n' as u8);
+    // loop {
+    //     let c = uart.recv();
+    //     uart.send(c);
+    // }
+    periph.gpio.set_gpio_func(16, GPIOFunc::Out);
     loop {
-        let c = uart.recv();
-        uart.send(c);
+        periph.gpio.set_pin_out(&[16]);
+        delay_s(1);
+        periph.gpio.clear_pin_out(&[16]);
+        delay_s(1);
     }
-    return;
 }

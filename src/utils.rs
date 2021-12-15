@@ -55,16 +55,29 @@ pub fn bit_range_set(old_val: u32, set_val: u32, msb: u32, lsb: u32) -> u32 {
     let set_mask = bit_range_mask32(msb - lsb, 0);
     let final_set_val = set_val & set_mask;
     assert_eq!(final_set_val, set_val);
-    cleared_val | final_set_val
+    cleared_val | (final_set_val << lsb)
 }
 
 pub fn bit_range_get(val: u32, msb: u32, lsb: u32) -> u32 {
     (val & bit_range_mask32(msb, lsb)) >> lsb
 }
-pub fn delay(cycle_count: u32) {
+
+pub fn delay(cycle_count: u64) {
     for _ in 0..cycle_count {
         unsafe {
             asm!("nop");
         }
     }
+}
+
+pub fn delay_us(us: u64) {
+    delay(6 * us);
+}
+
+pub fn delay_ms(ms: u64) {
+    delay_us(1000 * ms);
+}
+
+pub fn delay_s(s: u64) {
+    delay_ms(1000 * s);
 }
